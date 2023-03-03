@@ -12,10 +12,11 @@
 
     {{ post.content|markdown_to_html|sanitize_html }}
 
+
     {{ include('blog/_post_tags.html.twig') }}
 
     <div id="post-footer" class="well">
-        {% include 'blog/_post_like.html.twig' with { 'postId': post.id } only %}
+        {% include 'blog/_post_like.html.twig' with { postId: post.id, isLiked: isPostLikedByCurrentUser, postLikesCount: postLikesCount } only %}
 
         <div id="post-add-comment">
             {% if is_granted('IS_AUTHENTICATED_FULLY') %}

@@ -13,8 +13,10 @@ namespace App\Controller;
 
 use App\Entity\Comment;
 use App\Entity\Post;
+use App\Entity\User;
 use App\Event\CommentCreatedEvent;
 use App\Form\CommentType;
+use App\Repository\LikeRepository;
 use App\Repository\PostRepository;
 use App\Repository\TagRepository;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
@@ -71,7 +73,7 @@ class BlogController extends AbstractController
      * value given in the route.
      * See https://symfony.com/doc/current/bundles/SensioFrameworkExtraBundle/annotations/converters.html
      */
-    public function postShow(Post $post): Response
+    public function postShow(Post $post, LikeRepository $likeRepository): Response
     {
         // Symfony's 'dump()' function is an improved version of PHP's 'var_dump()' but
         // it's not available in the 'prod' environment to prevent leaking sensitive information.
@@ -80,7 +82,20 @@ class BlogController extends AbstractController
         //
         // dump($post, $this->getUser(), new \DateTime());
 
-        return $this->render('blog/post_show.html.twig', ['post' => $post]);
+        /** @var User|null $user */
+        $user = $this->getUser();
+
+        $isPostLikedByCurrentUser = false;
+
+        if ($user !== null) {
+            $isPostLikedByCurrentUser = null !== $likeRepository->findOneByPostAndUser($post, $user);
+        }
+
+        return $this->render('blog/post_show.html.twig', [
+            'post' => $post,
+            'postLikesCount' => $likeRepository->getPostLikesCount($post),
+            'isPostLikedByCurrentUser' => $isPostLikedByCurrentUser,
+        ]);
     }
 
     /**

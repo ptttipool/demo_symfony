@@ -1,0 +1,16 @@
+
+<div id="post-likes">
+    <div id="post-likes-count">{{ postLikesCount }}</div>
+    <div id="post-add-like">
+        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+            <button data-post-id="{{ postId }}" data-is-liked="{{ isLiked }}" class="btn-secondary like-review">
+                <i class="fa fa-heart" aria-hidden="true"></i> {{ isLiked ? 'You liked this' : 'Like' }}
+            </button>
+        {% else %}
+        {% endif %}
+    </div>
+</div>
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('postLike') }}
+{% endblock %}
