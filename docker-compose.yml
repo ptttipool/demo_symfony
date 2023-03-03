@@ -1,0 +1,68 @@
+version: '3.7'
+
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: ./docker/nginx/Dockerfile
+      args:
+        APP_ENV: dev
+    depends_on:
+      - php
+    volumes:
+      - ./public:/var/www/public
+    ports:
+      - 8080:80
+    networks:
+      - default
+
+  php:
+    build:
+      context: .
+      dockerfile: ./docker/php/dev/Dockerfile
+    environment:
+      XDEBUG_CONFIG: >-
+        remote_enable=1
+        remote_host=host.docker.internal
+        remote_connect_back=1
+        remote_autostart=1
+        remote_port=9000
+        idekey=PHPSTORM
+      PHP_IDE_CONFIG: serverName=app
+    depends_on:
+      - db
+    networks:
+      - default
+    volumes:
+      - ./:/var/www/
+
+  nodejs:
+    image: node:18.14.0
+    command:
+      - /bin/sh
+      - -c
+      - |
+        sleep 99999999
+    working_dir: /app
+    volumes:
+      - ./:/app
+
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - default
+    ports:
+      - 3306:3306
+
+volumes:
+  db-data: {}
+
+networks:
+  default:
